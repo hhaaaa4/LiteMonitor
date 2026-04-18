@@ -220,6 +220,7 @@
 
     "HardwareSettings": "Source",
     "DiskSource": "Disk",
+    "GpuSource": "GPU",
     "NetworkSource": "Network",
     "Auto": "Auto",
     "UseWinPerCounters": "Use Sys Counters",
