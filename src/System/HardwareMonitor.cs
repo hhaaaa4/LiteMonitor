@@ -497,6 +497,8 @@ namespace LiteMonitor.src.SystemServices
 
         public static List<string> ListAllDisks() => HardwareScanner.ListAllDisks(Instance!._computer);
 
+        public static List<string> ListAllGpus() => HardwareScanner.ListAllGpus(Instance!._computer);   // ★★★ [新增] ★★★
+
         public static List<string> ListAllFans() => HardwareScanner.ListAllFans(Instance!._computer, Instance!._lock);
 
         public static List<string> ListAllMoboTemps() => HardwareScanner.ListAllMoboTemps(Instance!._computer, Instance!._lock);
