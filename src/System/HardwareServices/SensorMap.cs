@@ -62,6 +62,18 @@ namespace LiteMonitor.src.SystemServices
             }
         }
 
+        /// <summary>
+        /// ★★★ [新增] 使映射失效，强制下次 EnsureFresh 时重建 ★★★
+        /// 用于 PreferredGpu 等配置变更后立即生效
+        /// </summary>
+        public void Invalidate()
+        {
+            lock (_lock)
+            {
+                _lastMapBuild = DateTime.MinValue;
+            }
+        }
+
 
 
         public bool TryGetSensor(string key, out ISensor? sensor)
@@ -100,10 +112,25 @@ namespace LiteMonitor.src.SystemServices
             // 但为了保持原代码结构，我们依然用candidates收集主板相关数据
             var candidatesMoboTemps = new List<ISensor>(capacity: 10); // 预设容量，减少扩容开销
 
+            // ★★★ [新增] 读取用户首选显卡配置 (空=自动选第一块) ★★★
+            string prefGpu = cfg.PreferredGpu ?? "";
+
             // 局部递归函数
             void RegisterTo(IHardware hw)
             {
                 //hw.Update();
+
+                // ★★★ [新增] 首选显卡过滤：如果用户指定了首选 GPU，非匹配 GPU 完全跳过 ★★★
+                // 这样 newGpu 和 newMap["GPU.*"] 都只会来自用户指定的显卡
+                bool isGpuHw = hw.HardwareType == HardwareType.GpuNvidia ||
+                               hw.HardwareType == HardwareType.GpuAmd ||
+                               hw.HardwareType == HardwareType.GpuIntel;
+                if (isGpuHw && !string.IsNullOrEmpty(prefGpu) &&
+                    !hw.Name.Equals(prefGpu, StringComparison.OrdinalIgnoreCase))
+                {
+                    // 不处理该 GPU 的任何数据，也不递归其 SubHardware
+                    return;
+                }
 
                 // --- 填充 CPU 缓存 (用于加权平均) ---
                 if (hw.HardwareType == HardwareType.Cpu)

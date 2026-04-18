@@ -14,6 +14,7 @@ namespace LiteMonitor.src.SystemServices
         private static List<string>? _cachedNetworkList = null;
         private static List<string>? _cachedDiskList = null;
         private static List<string>? _cachedMoboTempList = null;
+        private static List<string>? _cachedGpuList = null;   // ★★★ [新增] GPU 列表缓存 ★★★
 
         /// <summary>
         /// 清除所有扫描缓存
@@ -24,6 +25,7 @@ namespace LiteMonitor.src.SystemServices
             _cachedNetworkList = null;
             _cachedDiskList = null;
             _cachedMoboTempList = null;
+            _cachedGpuList = null;   // ★★★ [新增] ★★★
         }
 
         /// <summary>
@@ -70,6 +72,24 @@ namespace LiteMonitor.src.SystemServices
                 .Select(h => h.Name).Distinct().ToList();
 
             if (list.Count > 0) _cachedDiskList = list;
+            return list.ToList();
+        }
+
+        /// <summary>
+        /// ★★★ [新增] 列出所有显卡名称 (支持 NVIDIA / AMD / Intel) ★★★
+        /// </summary>
+        public static List<string> ListAllGpus(IComputer computer)
+        {
+            if (_cachedGpuList != null && _cachedGpuList.Count > 0)
+                return _cachedGpuList.ToList();
+
+            var list = computer.Hardware
+                .Where(h => h.HardwareType == HardwareType.GpuNvidia ||
+                            h.HardwareType == HardwareType.GpuAmd ||
+                            h.HardwareType == HardwareType.GpuIntel)
+                .Select(h => h.Name).Distinct().ToList();
+
+            if (list.Count > 0) _cachedGpuList = list;
             return list.ToList();
         }
 
