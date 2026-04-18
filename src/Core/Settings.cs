@@ -33,6 +33,7 @@ namespace LiteMonitor
         public string LastAutoNetwork { get; set; } = "";
         public string PreferredDisk { get; set; } = "";
         public string LastAutoDisk { get; set; } = "";
+        public string PreferredGpu { get; set; } = "";   // ★★★ [新增] 首选显卡 (空=自动选第一块) ★★★
         
         // ★★★ [新增] 首选风扇 ★★★
         public string PreferredCpuFan { get; set; } = "";
