@@ -17,6 +17,7 @@ namespace LiteMonitor.src.UI.SettingsPage
         
         // ★★★ 修复：类型更正为 LiteComboBox ★★★
         private LiteComboBox _cbDisk, _cbNet, _cbMobo;
+        private LiteComboBox _cbGpu;   // ★★★ [新增] 显卡下拉 ★★★
         private LiteComboBox _cbFanCpu, _cbFanPump, _cbFanCase;
 
         public SystemHardwarPage()
@@ -54,10 +55,11 @@ namespace LiteMonitor.src.UI.SettingsPage
                 // 1. 并行等待所有数据返回 (使用 HardwareScanner)
                 var taskDisks = Task.Run(() => HardwareScanner.ListAllDisks(HardwareMonitor.Instance.ComputerInstance));
                 var taskNets  = Task.Run(() => HardwareScanner.ListAllNetworks(HardwareMonitor.Instance.ComputerInstance));
+                var taskGpus  = Task.Run(() => HardwareScanner.ListAllGpus(HardwareMonitor.Instance.ComputerInstance));   // ★★★ [新增] ★★★
                 var taskFans  = Task.Run(() => HardwareScanner.ListAllFans(HardwareMonitor.Instance.ComputerInstance, HardwareMonitor.Instance.SyncLock));
                 var taskMobo  = Task.Run(() => HardwareScanner.ListAllMoboTemps(HardwareMonitor.Instance.ComputerInstance, HardwareMonitor.Instance.SyncLock));
 
-                await Task.WhenAll(taskDisks, taskNets, taskFans, taskMobo);
+                await Task.WhenAll(taskDisks, taskNets, taskGpus, taskFans, taskMobo);
 
                 // 2. ★★★ 锁定全局布局 (防止每填一个框就重绘一次) ★★★
                 this.SuspendLayout();
@@ -86,6 +88,7 @@ namespace LiteMonitor.src.UI.SettingsPage
                 // 3. 瞬间填入所有数据 (因为布局被挂起，用户看不见中间过程)
                 FillSync(_cbDisk, taskDisks.Result, Config.PreferredDisk);
                 FillSync(_cbNet, taskNets.Result, Config.PreferredNetwork);
+                FillSync(_cbGpu, taskGpus.Result, Config.PreferredGpu);   // ★★★ [新增] ★★★
                 FillSync(_cbMobo, taskMobo.Result, Config.PreferredMoboTemp);
                 
                 // Fan 的数据是复用的
@@ -136,6 +139,11 @@ namespace LiteMonitor.src.UI.SettingsPage
             _cbDisk = (LiteComboBox)group.AddCombo(this, "Menu.DiskSource", new List<string> { strAuto }, 
                 () => Config?.PreferredDisk ?? strAuto, 
                 v => { if(Config!=null) Config.PreferredDisk = (v == strAuto ? "" : v); });
+
+            // ★★★ [新增] 显卡来源下拉：多显卡设备 (笔记本核显+独显) 可选择显示哪块 ★★★
+            _cbGpu = (LiteComboBox)group.AddCombo(this, "Menu.GpuSource", new List<string> { strAuto },
+                () => Config?.PreferredGpu ?? strAuto,
+                v => { if (Config != null) Config.PreferredGpu = (v == strAuto ? "" : v); });
 
             _cbNet = (LiteComboBox)group.AddCombo(this, "Menu.NetworkSource", new List<string> { strAuto },
                 () => Config?.PreferredNetwork ?? strAuto,
