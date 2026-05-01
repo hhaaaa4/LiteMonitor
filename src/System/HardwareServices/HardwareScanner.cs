@@ -49,14 +49,14 @@ namespace LiteMonitor.src.SystemServices
         public static List<string> ListAllNetworks(IComputer computer)
         {
             if (_cachedNetworkList != null && _cachedNetworkList.Count > 0)
-                return _cachedNetworkList.ToList();
+                return new List<string>(_cachedNetworkList);
 
             var list = computer.Hardware
                 .Where(h => h.HardwareType == HardwareType.Network)
                 .Select(h => h.Name).Distinct().ToList();
 
             if (list.Count > 0) _cachedNetworkList = list;
-            return list.ToList();
+            return list;
         }
 
         /// <summary>
@@ -65,14 +65,14 @@ namespace LiteMonitor.src.SystemServices
         public static List<string> ListAllDisks(IComputer computer)
         {
             if (_cachedDiskList != null && _cachedDiskList.Count > 0)
-                return _cachedDiskList.ToList();
+                return new List<string>(_cachedDiskList);
 
             var list = computer.Hardware
                 .Where(h => h.HardwareType == HardwareType.Storage)
                 .Select(h => h.Name).Distinct().ToList();
 
             if (list.Count > 0) _cachedDiskList = list;
-            return list.ToList();
+            return list;
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace LiteMonitor.src.SystemServices
         public static List<string> ListAllGpus(IComputer computer)
         {
             if (_cachedGpuList != null && _cachedGpuList.Count > 0)
-                return _cachedGpuList.ToList();
+                return new List<string>(_cachedGpuList);
 
             var list = computer.Hardware
                 .Where(h => h.HardwareType == HardwareType.GpuNvidia ||
@@ -90,7 +90,7 @@ namespace LiteMonitor.src.SystemServices
                 .Select(h => h.Name).Distinct().ToList();
 
             if (list.Count > 0) _cachedGpuList = list;
-            return list.ToList();
+            return list;
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace LiteMonitor.src.SystemServices
         public static List<string> ListAllFans(IComputer computer, object syncLock)
         {
             if (_cachedFanList != null && _cachedFanList.Count > 0)
-                return _cachedFanList.ToList();
+                return new List<string>(_cachedFanList);
 
             var list = new List<string>();
             lock (syncLock)
@@ -124,10 +124,9 @@ namespace LiteMonitor.src.SystemServices
                 foreach (var hw in computer.Hardware) Scan(hw);
             }
 
-            list.Sort();
-            var final = list.Distinct().ToList();
+            var final = list.Distinct().OrderBy(name => name).ToList();
             if (final.Count > 0) _cachedFanList = final;
-            return final.ToList();
+            return final;
         }
 
         /// <summary>
@@ -136,7 +135,7 @@ namespace LiteMonitor.src.SystemServices
         public static List<string> ListAllMoboTemps(IComputer computer, object syncLock)
         {
             if (_cachedMoboTempList != null && _cachedMoboTempList.Count > 0)
-                return _cachedMoboTempList.ToList();
+                return new List<string>(_cachedMoboTempList);
 
             var list = new List<string>();
             lock (syncLock)
@@ -161,10 +160,9 @@ namespace LiteMonitor.src.SystemServices
                 foreach (var hw in computer.Hardware) Scan(hw);
             }
 
-            list.Sort();
-            var final = list.Distinct().ToList();
+            var final = list.Distinct().OrderBy(name => name).ToList();
             if (final.Count > 0) _cachedMoboTempList = final;
-            return final.ToList();
+            return final;
         }
     }
 }
